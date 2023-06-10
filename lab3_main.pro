@@ -12,83 +12,83 @@ predicates
     run : string -> string.
 
 clauses
-    % ���ѧԧ��٧ܧ� �ҧѧ٧� ��ѧܧ��� �ڧ� ��ѧۧݧ�
+    % Загрузка базы фактов из файла
     run(FileName) :-
         consult(FileName),
-        write("���ѧ٧� ��ѧܧ��� �٧ѧԧ��ا֧ߧ�."), nl,
+        write("База фактов загружена."), nl,
         main_menu.
 
-    % ���ݧѧӧߧ�� �ާ֧ߧ�
+    % Главное меню
     main_menu :-
-        write("1. ���ѧۧ�� �ѧ��֧ܧ�, �ԧէ� �ݧ֧ܧѧ���ӧ� ��ѧާ�� �է֧�֧ӧ��."), nl,
-        write("2. �����ӧ֧�ڧ�� �ߧѧݧڧ�ڧ� �ݧ֧ܧѧ���ӧ� �� ����֧է֧ݧ֧ߧߧ�� �ѧ��֧ܧ�."), nl,
-        write("3. ������ڧ�ݧڧ�� ���֧էߧ�� ��֧ߧ� �٧ѧէѧߧߧ�ԧ� �ݧ֧ܧѧ���ӧ�."), nl,
-        write("4. ��������."), nl,
-        write("���ӧ֧էڧ�� �ߧ�ާ֧� �ܧ�ާѧߧէ�: "),
+        write("1. Найти аптеку, где лекарство самое дешевое."), nl,
+        write("2. Проверить наличие лекарства в определенной аптеке."), nl,
+        write("3. Вычислить среднюю цену заданного лекарства."), nl,
+        write("4. Выход."), nl,
+        write("Введите номер команды: "),
         read(Command),
         process_command(Command).
 
-    % ���ҧ�ѧҧ��ܧ� �ܧ�ާѧߧէ�
+    % Обработка команды
     process_command(1) :-
-        write("���ӧ֧էڧ�� �ߧѧ٧ӧѧߧڧ� �ݧ֧ܧѧ���ӧ�: "),
+        write("Введите название лекарства: "),
         read(Medication),
-        write("���ӧ֧էڧ�� �ܧ�ݧڧ�֧��ӧ�: "),
+        write("Введите количество: "),
         read(Quantity),
         findall([Medication, Price, Pharmacy, Address], cheapest_pharmacy(Medication, Quantity, Pharmacy, Address, Price), Result),
         print_list(Result),
         main_menu.
 
     process_command(2) :-
-        write("���ӧ֧էڧ�� �ߧѧ٧ӧѧߧڧ� �ݧ֧ܧѧ���ӧ�: "),
+        write("Введите название лекарства: "),
         read(Medication),
-        write("���ӧ֧էڧ�� �ܧ�� �ѧ��֧ܧ�: "),
+        write("Введите код аптеки: "),
         read(PharmacyID),
         findall([Medication, Price, Quantity], available_at(Medication, PharmacyID, Price, Quantity), Result),
         print_list(Result),
         main_menu.
 
     process_command(3) :-
-        write("���ӧ֧էڧ�� �ߧѧ٧ӧѧߧڧ� �ݧ֧ܧѧ���ӧ�: "),
+        write("Введите название лекарства: "),
         read(Medication),
         findall(Price, available_at(Medication, _, Price, _), Prices),
         calculate_average(Prices, AveragePrice),
-        write("����֧էߧ�� ��֧ߧ� �էݧ� �ݧ֧ܧѧ���ӧ� "),
+        write("Средняя цена для лекарства "),
         write(Medication),
-        write(" �����ѧӧݧ�֧� "),
+        write(" составляет "),
         write(AveragePrice),
         write("."), nl,
         main_menu.
 
     process_command(4) :-
-        write("�������� �ڧ� ����ԧ�ѧާާ�."), nl.
+        write("Выход из программы."), nl.
 
     process_command(_) :-
-        write("���֧ܧ���֧ܧ�ߧѧ� �ܧ�ާѧߧէ�."), nl,
+        write("Некорректная команда."), nl,
         main_menu.
 
-    % ����ѧӧڧݧ� �էݧ� ����ӧ֧�ܧ� �ߧѧݧڧ�ڧ� �ݧ֧ܧѧ���ӧ� �� �ѧ��֧ܧ�
+    % Правило для проверки наличия лекарства в аптеке
     available_at(Medication, PharmacyID, Price, Quantity) :-
         medication(MedID, Medication),
         pharmacy(PharmacyID, _, _, _),
         sales(PharmacyID, MedID, Price, Quantity).
 
-    % ����ѧӧڧݧ� �էݧ� ���ڧ�ܧ� ��ѧާ�� �է֧�֧ӧ�� �ѧ��֧ܧ�, �ԧէ� �է�����ߧ� �ݧ֧ܧѧ���ӧ�
+    % Правило для поиска самой дешевой аптеки, где доступно лекарство
     cheapest_pharmacy(Medication, Quantity, PharmacyID, Address, Price) :-
         available_at(Medication, PharmacyID, Price, Quantity),
         not((available_at(Medication, OtherPharmacy, OtherPrice, _), OtherPrice < Price)),
         pharmacy(PharmacyID, _, Address, _).
 
-    % ����ѧӧڧݧ� �էݧ� �ӧ��ӧ�է� ��ݧ֧ާ֧ߧ��� ���ڧ�ܧ�
+    % Правило для вывода элементов списка
     print_list([]).
     print_list([[Medication, Price, Pharmacy, Address] | Rest]) :-
-        write("���֧ܧѧ���ӧ�: "), write(Medication),
-        write(", ���֧ߧ�: "), write(Price),
-        write(", �����֧ܧ�: "), write(Pharmacy),
-        write(", ���է�֧�: "), write(Address),
+        write("Лекарство: "), write(Medication),
+        write(", Цена: "), write(Price),
+        write(", Аптека: "), write(Pharmacy),
+        write(", Адрес: "), write(Address),
         nl,
         print_list(Rest).
 
-    % ����ѧӧڧݧ� �էݧ� �ӧ���ڧ�ݧ֧ߧڧ� ���֧էߧ֧ԧ� �٧ߧѧ�֧ߧڧ� ���ڧ�ܧ�
+    % Правило для вычисления среднего значения списка
     calculate_average(List, Average) :-
         sum_list(List, Sum),
         length(List, Length),
